@@ -35,6 +35,13 @@ int main(int argc, char *argv[])
   PID pid;
   // TODO: Initialize the pid variable.
   // sample params: ./pid -0.15 -0.001 -1.0
+
+  // Command usage
+  if (argc != 4) {
+    std::cout << "Usage: ./pid Kp Ki Kd"  << std::endl;
+    return 1;
+  }
+
   double init_Kp = atof(argv[1]);
   double init_Ki = atof(argv[2]);
   double init_Kd = atof(argv[3]);
