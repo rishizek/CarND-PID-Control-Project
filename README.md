@@ -33,7 +33,7 @@ There's an experimental patch for windows in this [PR](https://github.com/udacit
 1. Clone this repo.
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+4. Run it: `./pid Kp Ki Kd`. *Note parameters Kp, Ki, and Kd are added to argument to make parameter-tuning easier. 
 
 ## Editor Settings
 
@@ -90,3 +90,34 @@ that's just a guess.
 
 One last note here: regardless of the IDE used, every submitted project must
 still be compilable with cmake and make./
+
+[video1]: ./output.mp4
+
+## Reflection
+### Describe the effect each of the P, I, D components had in your implementation.
+#### P
+As we increase the Kp (the coefficient for the proportional term) value, the car moves more rapidly to the center of the road, as P controller explains the present value of the cross track error. If, however, we use too large Kp, the car oscillates faster and moves off the road quickly.
+
+#### I
+The I controller represents the cumulated value of the past cross track error, and this controller is useful to remove the systematic bias of the car. As we increase the Ki (the coefficient for the integral term), the correction of the systematic bias becomes stronger. However, if we increase the value too much, the vehicle do not converge to the center of the road, because I conroller dominates PD controllers in such case.
+
+#### D
+The D controller is useful for the gradual reduction of oscillation (damping effect). 
+The increase of the Kd (the coefficient for the derivative term) lets the vehicle approach to the center of the road more smoothly but less quickly. Therefore, if we set value too large, the car may not react quick enough when the road is curved.
+
+#### Result
+Here's a [link to my video result][video1]
+with Kp = 0.15, Ki = 0.001, and Kd = 1.0.
+
+
+### Describe how the final hyperparameters were chosen.
+
+I tuned the hyperparameters manually as the implementation of the optimiser for this model is quite complex and manual tuning provides decent result for my case. I describe my approach below.
+
+Initially I only turned Kp and Kd values assuming the simulator does not have the systematic bias (namely Ki = 0.0).
+Next I set Kp = 1.0 and Kd = 0.0 (with Ki = 0.0) with twiddle method in mind. Then, the car rapidly oscillated and quickly went out of the road. Therefore, I decreased the Kp and also increased Kd values so that the car moves toward the center of the road more gradually and converge there. With I set Kp = 0.15 and Kd = 1.0 (with Ki = 0.0), the car stabilized around the center of road, and was able to run the complete track without touching the edge of road. 
+
+After that, to stabilized the vehicle further, I turned Ki value with keeping the above Kp and Kd values. There, I first tried Ki = 1.0 but the car immediately diverged the course as presumably I controller dominates other controllers. After several try and error, I found Ki = 0.001 worked best for my case. It is probably because the simulator has very small systematic bias.
+
+Here's my final parameters for the model:
+Kp = 0.15, Ki = 0.001, and Kd = 1.0.
